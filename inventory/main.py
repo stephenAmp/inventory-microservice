@@ -14,9 +14,9 @@ app.add_middleware(
 )
 
 redis = get_redis_connection(
-    host='REMOVED',
+    host='',
     port = 13982,
-    password = 'REMOVED',
+    password = '',
     decode_responses=True
 )
 
