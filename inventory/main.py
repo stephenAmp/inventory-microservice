@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from redis_om import get_redis_connection, HashModel
 from settings import settings
@@ -24,7 +24,7 @@ redis = get_redis_connection(
 class Product(HashModel):
     name: str
     price: float
-    quantity: int
+    quantity: float
 
     class Meta:
         database = redis
@@ -51,7 +51,13 @@ def create(product:Product):
 
 @app.get('/products/{pk}')
 def get_by_id(pk):
-    return Product.get(pk)
+    try:
+        product = Product.get(pk)
+    except:
+        raise HTTPException(status_code = 400, detail = 'product not found')
+    redis.xadd('refund_order', product.model_dump(),'*')
+    return product
+
     
 
 @app.delete('/products/{pk}')
